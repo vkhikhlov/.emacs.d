@@ -1,0 +1,167 @@
+#+TITLE: Emacs configuration file
+#+AUTHOR: Vladislav Khikhlov
+#+BABEL: :cache yes
+#+PROPERTY: header-args :tangle yes
+
+* Introduction
+
+  Trying to capture my own config starting from as simple as possible and growing on demand and as my knowledge of emacs will mount.
+
+  Some useful links:
+
+  [[https://emacscast.org/][Rakhim Davletkaliyev's podcast about emacs and related stuff.]]
+  
+* Configurations
+** Meta
+   #+BEGIN_SRC emacs-lisp
+   ;;; -*- lexical-binding: t -*-
+   #+END_SRC
+
+   Tangle and compile this file on save automatically:
+
+   #+BEGIN_SRC emacs-lisp
+   (defun tangle-init ()
+     "If the current buffer is 'init.org' the code-blocks are
+   tangled, and the tangled file is compiled."
+     (when (equal (buffer-file-name)
+                  (expand-file-name (concat user-emacs-directory "init.org")))
+       ;; Avoid running hooks when tangling.
+       (let ((prog-mode-hook nil))
+         (org-babel-tangle)
+         (byte-compile-file (concat user-emacs-directory "init.el")))))
+
+   (add-hook 'after-save-hook 'tangle-init)
+   #+END_SRC
+   
+** Visuals
+
+   Remove toolbar and menubar. One of the core concepts of emacs is ability to bind everything to keyboard shortcuts. It allows you to be more productive as soon as you remember those combinations and speed of your editing capabilities will be restricted only by speed of your mind.
+
+   #+BEGIN_SRC emacs-lisp
+   (tool-bar-mode -1)
+   (menu-bar-mode -1)
+   #+END_SRC
+
+** Defaults
+
+   Let all the file backups go to one global location instead of corresponding paths:
+
+   #+BEGIN_SRC emacs-lisp
+   (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+   (scroll-bar-mode -1)
+   (desktop-save-mode 1)
+   (blink-cursor-mode 0)
+   (display-time-mode 1)
+   (setq display-time-24hr-format t)
+   (setq column-number-mode t)
+   (global-visual-line-mode t)
+   #+END_SRC
+
+
+  Allow shift selection with arrows. This will not interfere with some built-in shift+arrow functionality in Org.
+
+  #+BEGIN_SRC emacs-lisp
+  (setq org-support-shift-select t)
+  #+END_SRC
+
+   Org has templates, so doing =<s TAB= creates a source code block. Here is a custom template for emacs-lisp specifically. So, =<el TAB= creates the Emacs lisp code block and puts the cursor inside.
+  
+  #+BEGIN_SRC emacs-lisp
+  (eval-after-load 'org
+    '(progn
+      (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp \n?\n#+END_SRC"))))
+  #+END_SRC
+   
+** Packages
+
+   Initialize package and add Melpa source
+
+   #+BEGIN_SRC emacs-lisp
+   (require 'package)
+   (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
+                       (not (gnutls-available-p))))
+          (proto (if no-ssl "http" "https")))
+     (when no-ssl (warn "\
+   Your version of Emacs does not support SSL connections,
+   which is unsafe because it allows man-in-the-middle attacks.
+   There are two things you can do about this warning:
+   1. Install an Emacs version that does support SSL and be safe.
+   2. Remove this warning from your init file so you won't see it again."))
+     (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
+     ;; Comment/uncomment this line to enable MELPA Stable if desired.  See `package-archive-priorities`
+     ;; and `package-pinned-packages`. Most users will not need or want to do this.
+     ;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
+     )
+   (package-initialize)
+   #+END_SRC
+
+   Install use-package
+
+   #+BEGIN_SRC emacs-lisp
+   (unless (package-installed-p 'use-package)
+   (package-refresh-contents)
+   (package-install 'use-package))
+
+   (eval-when-compile (require 'use-package))
+   (setq use-package-always-ensure t)
+
+   ;; this package is useful for overriding major mode keybindings
+   (use-package bind-key)
+   #+END_SRC
+
+   Install try to try packages
+
+   #+BEGIN_SRC emacs-lisp
+   (use-package try
+     :ensure t)
+   #+END_SRC
+
+   Nyan mode is essential
+
+   #+BEGIN_SRC emacs-lisp
+   (use-package nyan-mode
+     :ensure t
+     :config
+     (nyan-mode))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp 
+   (use-package haskell-mode
+     :ensure t)
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp 
+   (require 'haskell-interactive-mode)
+   (require 'haskell-process)
+   (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp 
+   (use-package neotree
+   :ensure t
+   :config
+   (setq neo-window-width 32
+         neo-create-file-auto-open t
+         neo-banner-message nil
+         neo-mode-line-type 'neotree
+         neo-smart-open t
+         neo-show-hidden-files t
+         neo-mode-line-type 'none
+         neo-auto-indent-point t)
+   (setq neo-theme (if (display-graphic-p) 'nerd 'arrow))
+   (global-set-key (kbd "s-B") 'neotree-toggle))
+   #+END_SRC
+
+  #+BEGIN_SRC emacs-lisp
+  (use-package reverse-im
+  :init
+  (require 'cl) 
+  :ensure t
+  :custom
+  (reverse-im-input-methods '("russian-computer"))
+  :config
+  (reverse-im-mode t))
+  #+END_SRC
