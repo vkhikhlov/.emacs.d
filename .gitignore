@@ -1,6 +1,9 @@
 elpa
+*.elc
 backups
-init.elc
+*session*
+custom.el
 auto-save-list
 .emacs.desktop
 .emacs.desktop.lock
+projectile-bookmarks.eld
