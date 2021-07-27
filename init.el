@@ -16,6 +16,7 @@
 (display-time-mode 1)
 (blink-cursor-mode 0)
 (column-number-mode t)
+(load-theme 'tsdh-light)
 (global-display-line-numbers-mode)
 
 (setq display-time-24hr-format t)
@@ -27,6 +28,26 @@
 
 (require 'use-package)
 (setq use-package-verbose t)
+
+(use-package move-text
+  :ensure t
+  :init
+  (move-text-default-bindings))
+
+(use-package treemacs
+  :ensure t
+  :config
+  (add-hook 'window-setup-hook #'treemacs 'append))
+
+(use-package treemacs-projectile
+  :after (treemacs projectile)
+  :ensure t)
+
+(use-package diff-hl
+  :ensure t
+  :config
+  (global-diff-hl-mode +1)
+  (add-hook 'dired-mode-hook 'diff-hl-dired-mode))
 
 (use-package nyan-mode
   :ensure t

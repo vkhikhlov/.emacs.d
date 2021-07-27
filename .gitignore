@@ -1,5 +1,6 @@
 elpa
 *.elc
+.cache
 backups
 *session*
 custom.el
