@@ -18,6 +18,7 @@
 (column-number-mode t)
 (load-theme 'tsdh-light)
 (global-display-line-numbers-mode)
+(global-set-key (kbd "C-x C-b") #'ibuffer)
 
 (setq display-time-24hr-format t)
 (setq tab-always-indent 'complete)
@@ -28,6 +29,10 @@
 
 (require 'use-package)
 (setq use-package-verbose t)
+
+(use-package windmove
+  :config
+  (windmove-default-keybindings))
 
 (use-package move-text
   :ensure t
@@ -84,6 +89,7 @@
 
 (use-package lsp-mode
   :ensure t
+  :init (setq lsp-keymap-prefix "C-c l")
   :hook (
          (haskell-mode . lsp)
          (lsp-mode . lsp-enable-which-key-integration))
